@@ -212,7 +212,7 @@
             document.querySelector('.titulo').innerHTML = `${data.name} - ${data.country}`;
             document.querySelector('.tempInfo').innerHTML = `${data.temp} <sup>°C</sup>`;
             document.querySelector('.ventoInfo').innerHTML = `${data.wind.speed} <span>KM/H</span>`;
-            document.querySelector('.temp img').setAttribute('src', `http://openweathermap.org/img/wn/${data.icon}@2x.png`)
+            document.querySelector('.temp img').setAttribute('src', `https://openweathermap.org/img/wn/${data.icon}@2x.png`)
             document.querySelector('.ventoPonto').style.transform = `rotate(${data.wind.angle}deg)`;
         }
 
