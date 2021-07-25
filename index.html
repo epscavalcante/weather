@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #333;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        h1 {
+            color: #FFF;
+            margin: 20px 0;
+        }
+
+        .busca {
+            display: flex;
+            width: 300px;
+        }
+
+        .busca #searchInput {
+            flex: 1;
+            padding: 10px;
+            outline: none;
+            font-size: 15px;
+            border-radius: 5px;
+            border: 0;
+        }
+
+        .busca button {
+            padding: 10px;
+            font-size: 15px;
+            border: 0;
+            background-color: #555;
+            color: #FFF;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .busca button:hover {
+            background-color: #444;
+        }
+
+        .resultado {
+            width: 300px;
+            display: none;
+            border: 1px dotted #FFF;
+            margin-top: 20px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .titulo {
+            width: 100%;
+            color: #FFF;
+            font-size: 25px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .info {
+            display: flex;
+            width: 100%;
+        }
+
+        .info .temp {
+            flex: 1;
+            text-align: center;
+        }
+
+        .info .vento {
+            flex: 1;
+            text-align: center;
+        }
+
+        .tempTitulo,
+        .ventoTitulo {
+            color: #777;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .tempInfo,
+        .ventoInfo {
+            color: #FFF;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .tempInfo sup {
+            font-size: 15px;
+            font-weight: normal;
+        }
+
+        .ventoInfo span {
+            font-size: 15px;
+            font-weight: normal;
+        }
+
+        .ventoArea {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #FFF;
+            border-radius: 50%;
+            margin: auto;
+            margin-top: 20px;
+            padding-left: 25px;
+            padding-top: 25px;
+        }
+
+        .ventoPonto {
+            width: 15px;
+            height: 1px;
+            background-color: #FFF;
+            transform-origin: left;
+        }
+
+        .aviso {
+            color: #FFF;
+            padding-top: 20px;
+        }
+
+        footer {
+            margin-top: 20px;
+            color: #FFF;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Clima</h1>
+
+    <form class="busca">
+        <input type="search" id="searchInput" placeholder="Digite o nome da cidade..." />
+    </form>
+
+    <div class="resultado">
+        <div class="titulo">--</div>
+
+        <div class="info">
+            <div class="temp">
+                <div class="tempTitulo">Temperatura</div>
+                <div class="tempInfo">-- <sup>ºC</sup></div>
+                <img src="http://openweathermap.org/img/wn/10d@2x.png" />
+            </div>
+            <div class="vento">
+                <div class="ventoTitulo">Vento</div>
+                <div class="ventoInfo">-- <span>km/h</span></div>
+                <div class="ventoArea">
+                    <div class="ventoPonto" style="transform: rotate(0deg)"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="aviso"></div>
+
+    <script>
+        document.querySelector('.busca').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const city = document.querySelector('#searchInput').value;
+
+            if (city.trim()) {
+                showWarning();
+                hiddenResult();
+
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURI(city)}&units=metric&lang=pt
+                _br&appid=2a0c09cf0880c6704acbda0fbef6f62e`;
+                const request = await fetch(url);
+                const response = await request.json();
+
+                if (response.cod === 200) {
+                    showResult({
+                        name: response.name,
+                        country: response.sys.country,
+                        temp: response.main.temp,
+                        icon: response.weather[0].icon,
+                        wind: {
+                            speed: response.wind.speed,
+                            angle: response.wind.deg
+                        }
+                    });
+                } else {
+                    hiddenResult();
+                    showWarning('Ooops localização não encontrada, tente outra!');
+                }
+            }
+        });
+
+        function showResult(data) {
+            showWarning(null);
+            document.querySelector('.resultado').style.display = 'block';
+            document.querySelector('.titulo').innerHTML = `${data.name} - ${data.country}`;
+            document.querySelector('.tempInfo').innerHTML = `${data.temp} <sup>°C</sup>`;
+            document.querySelector('.ventoInfo').innerHTML = `${data.wind.speed} <span>KM/H</span>`;
+            document.querySelector('.temp img').setAttribute('src', `http://openweathermap.org/img/wn/${data.icon}@2x.png`)
+            document.querySelector('.ventoPonto').style.transform = `rotate(${data.wind.angle}deg)`;
+        }
+
+        function showWarning(message = 'Carregando ...') {
+            document.querySelector('.aviso').innerHTML = message;
+        }
+
+        function hiddenResult() {
+            document.querySelector('.resultado').style.display = 'none';
+        }
+
+    </script>
+</body>
+
+</html>
